@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         UCSD Webreg2GoogleCalendar
 // @namespace    http://anoxdd.github.io
-// @version      0.2.091115
+// @version      1.0.091115
 // @description  A script to convert UCSD Webreg to a .csv file that can be imported to Google Calendar
 // @author       Anoxic guanrunjie@gmail.com
 // @include      https://act.ucsd.edu/webreg2/main*
@@ -187,7 +187,12 @@ function processRawDataCollected(data) {
 			var timetable = timetables[j];
 			// Fix type
 			var type = timetable.type;
-			timetable.type = typeMap[type] || type;
+			if (typeMap[type]) {
+				timetable.type = typeMap[type];
+			} else {
+				timetables.splice(j--);
+				continue;
+			}
 			// Find the first day of class or process the days
 			if (type === "FI") {
 				// This is a final day, correct it `timetable.days` follows "[WEEKDAY] MM-DD-YYYY"
@@ -209,10 +214,10 @@ function processRawDataCollected(data) {
 						return {};
 					}
 					// Find the Monday of finals week
-					day -= (date.getDay() % 7 + 1);
+					day -= (date.getDay() % 7 - 1);
 					// Find the first Monday of the quarter, roll back ten weeks
 					day -= 70;
-					firstDay = new Date(parseInt(dateElements[3]), parseInt(dateElements[1]), day).getTime();
+					firstDay = new Date(parseInt(dateElements[2]), parseInt(dateElements[1]), day).getTime();
 				}
 			} else {
 				// A lecture, discussion or lab, separate those weekdays into a group of days
@@ -241,7 +246,7 @@ function processRawDataCollected(data) {
 				timetable.location = "";
 			}
 			// The subject of the calendar
-			timetable.subject = "[" + course + "] " + timetable.type + " (Room " + timetable.room + ")";
+			timetable.subject = "[" + course + "] " + timetable.type + (timetable.room ? " (Room " + timetable.room + ")" : "");
 		}
 	}
 	data.firstDay = firstDay;
@@ -255,7 +260,7 @@ function processRawDataCollected(data) {
  */
 function convertDataCollectedToCSV(data) {
 	// The header of the csv
-	var csv = "Subject,Start Date,Start Time,End Time,Location\n",
+	var csv = "Subject,Start Date,Start Time,End Date,End Time,Location\n",
 		courses = Object.keys(data);
 	if (courses.length) {
 		var weekdayMap = {
@@ -281,11 +286,11 @@ function convertDataCollectedToCSV(data) {
 						/*Iterator*/
 						var k;
 						var days = timetable.days,
-							newDays;
+							newDays = [];
 						// Get the days
 						for (k = 0; k !== days.length; ++k) {
 							var weekday = weekdayMap[days[k]];
-							if (weekday) {
+							if (weekday != undefined) {
 								newDays.push(weekday);
 							} else {
 								// Something goes wrong
@@ -302,19 +307,20 @@ function convertDataCollectedToCSV(data) {
 								// Go to that day
 								var today = new Date(firstMonday + newDays[l] * 86400000);
 								// Get the specific date
-								allDayStr.push(today.getDate() + "/" + (today.getMonth() + 1) + "/" + today.getFullYear());
+								allDayStr.push((today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear());
 							}
 							// Go to the next week
 							firstMonday += 7 * 86400000;
 						}
 						// Add these dates to the csv
 						for (k = 0; k !== allDayStr.length; ++k) {
-							csv += ['"' + timetable.subject + '"', allDayStr[k], timetable.startTime, timetable.endTime, '"' + timetable.location + '"'].join(",") + "\n";
+							csv += ['"' + timetable.subject + '"', allDayStr[k], timetable.startTime, allDayStr[k], timetable.endTime, '"' + timetable.location + '"'].join(",") + "\n";
 						}
 					}
 				}
 			}
 		}
+		return csv;
 	} else {
 		// Something goes wrong while converting
 		return "";
@@ -339,5 +345,6 @@ function downloadCSVData(csvStr) {
 
 // This script assumes that jQuery is preloaded
 $(document).ready(function() {
-	console.log("hello");
+	var $download = $("<a id='download-google-calendar' href='#'>Download Google Calendar</a> | ");
+	$download.click(downloadWebregData).prependTo("#view-booklist");
 });
