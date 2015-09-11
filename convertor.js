@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         UCSD Webreg2GoogleCalendar
 // @namespace    http://anoxdd.github.io
-// @version      1.0.091115
+// @version      1.1.091115
 // @description  A script to convert UCSD Webreg to a .csv file that can be imported to Google Calendar
 // @author       Anoxic guanrunjie@gmail.com
 // @include      https://act.ucsd.edu/webreg2/main*
@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 /**
- * The address code map of our campus��retrieved Sept 11, 2015
+ * The address code map of our campus, retrieved Sept 11, 2015
  * Change TBA and OFF (off-campus) to an empty string
  * @link https://libraries.ucsd.edu/_files/sshl/pdf/building-and-facility-codes.pdf
  */
@@ -190,7 +190,7 @@ function processRawDataCollected(data) {
 			if (typeMap[type]) {
 				timetable.type = typeMap[type];
 			} else {
-				timetables.splice(j--);
+				timetables.splice(j--, 1);
 				continue;
 			}
 			// Find the first day of class or process the days
@@ -281,7 +281,7 @@ function convertDataCollectedToCSV(data) {
 					// Create the list of the days
 					if (timetable.type === "FINAL") {
 						// Only one day of final
-						csv += ['"' + timetable.subject + '"', timetable.days, timetable.startTime, timetable.endTime, '"' + timetable.location + '"'].join(",") + "\n";
+						csv += ['"' + timetable.subject + '"', timetable.days, timetable.startTime, timetable.days, timetable.endTime, '"' + timetable.location + '"'].join(",") + "\n";
 					} else {
 						/*Iterator*/
 						var k;
@@ -345,6 +345,6 @@ function downloadCSVData(csvStr) {
 
 // This script assumes that jQuery is preloaded
 $(document).ready(function() {
-	var $download = $("<a id='download-google-calendar' href='#'>Download Google Calendar</a> | ");
-	$download.click(downloadWebregData).prependTo("#view-booklist");
+	var $download = $("<a id='download-google-calendar' href='javascript:;'>Download Google Calendar</a>");
+	$download.click(downloadWebregData).prependTo($("#view-booklist").prepend(" | "));
 });
