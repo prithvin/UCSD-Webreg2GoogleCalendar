@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         UCSD Webreg2GoogleCalendar
 // @namespace    http://anoxdd.github.io
-// @version      1.1.091115
+// @version      1.2.100715
 // @description  A script to convert UCSD Webreg to a .csv file that can be imported to Google Calendar
 // @author       Anoxic guanrunjie@gmail.com
 // @include      https://act.ucsd.edu/webreg2/main*
@@ -305,7 +305,7 @@ function convertDataCollectedToCSV(data) {
 						for (k = 0; k !== 10; ++k) {
 							for (var l = 0; l !== newDays.length; ++l) {
 								// Go to that day
-								var today = new Date(firstMonday + newDays[l] * 86400000);
+								var today = new Date(parseInt((firstMonday + newDays[l] * 86400000 + 86399999) / 86400000) * 86400000);
 								// Get the specific date
 								allDayStr.push((today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear());
 							}
