@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         UCSD Webreg2GoogleCalendar
 // @namespace    http://anoxdd.github.io
-// @version      1.2.100715
+// @version      1.3.100715
 // @description  A script to convert UCSD Webreg to a .csv file that can be imported to Google Calendar
 // @author       Anoxic guanrunjie@gmail.com
 // @include      https://act.ucsd.edu/webreg2/main*
@@ -201,7 +201,7 @@ function processRawDataCollected(data) {
 				if (!firstDay) {
 					// The first day is yet to be known
 					var dateElements = timetable.days.split("/"),
-						day = parseInt(dateElements[1]);
+						day = parseInt(dateElements[0]);
 					if (dateElements.length !== 3) {
 						// Something's wrong when converting the data, return nothing
 						alert("Cannot find the first day of the class");
